@@ -31,6 +31,7 @@ Sets the (global) apikey to `apikey`
 """
 function set_apikey(apikey::Union{AbstractString, Nothing})
     APIKEY[] = isnothing(apikey) ? apikey : String(apikey)
+    return nothing
 end
 
 """

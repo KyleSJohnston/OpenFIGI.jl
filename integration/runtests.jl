@@ -24,6 +24,16 @@ ENV["JULIA_DEBUG"] = OpenFIGI
     @test_throws ArgumentError Identifier("ID_BB_GLOBAL", "BBG000000000"; validation_policy=:none)
 end
 
+@testset "properties" begin
+    @test_throws OpenFIGI.InvalidEnumerationError ExchCode("ZZ"; validation_policy=:error)
+
+    id = @test_logs (:warn, "ZZ is not an enumerated value for exchCode") ExchCode("ZZ"; validation_policy=:warning)
+    @test id isa ExchCode
+
+    id = @test_nowarn ExchCode("ZZ"; validation_policy=:skip)
+    @test id isa ExchCode
+end
+
 @testset "mapping/values" begin
     obj = OpenFIGI.mapping_values("idType")
     @test obj isa OpenFIGI.ValuesResponse

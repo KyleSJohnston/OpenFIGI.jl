@@ -2,7 +2,7 @@
 
 struct MappingJob
     identifier::Identifier
-    properties::Tuple{Vararg{<:AbstractProperty}}
+    properties::Tuple{Vararg{AbstractProperty}}
     function MappingJob(identifier::Identifier, properties::AbstractProperty...)
         new(identifier, properties)
     end

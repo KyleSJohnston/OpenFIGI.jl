@@ -10,6 +10,11 @@ Base.convert(Pair, p::AbstractProperty) = Pair(propertykey(p), propertyvalue(p))
 
 struct ExchCode <: AbstractProperty
     value::String
+
+    function ExchCode(value::String; validation_policy::Symbol=:error)
+        validate_enum("exchCode", value; validation_policy)
+        new(value)
+    end
 end
 propertykey(::ExchCode) = "exchCode"
 propertyvalue(p::ExchCode) = p.value
@@ -17,6 +22,11 @@ propertyvalue(p::ExchCode) = p.value
 
 struct MICCode <: AbstractProperty
     value::String
+
+    function MICCode(value::String; validation_policy::Symbol=:error)
+        validate_enum("micCode", value; validation_policy)
+        new(value)
+    end
 end
 propertykey(::MICCode) = "micCode"
 propertyvalue(p::MICCode) = p.value
@@ -29,18 +39,33 @@ propertyvalue(p::Currency) = p.value
 
 struct MarketSecDes <: AbstractProperty
     value::String
+
+    function MarketSecDes(value::String; validation_policy::Symbol=:error)
+        validate_enum("marketSecDes", value; validation_policy)
+        new(value)
+    end
 end
 propertykey(::MarketSecDes) = "marketSecDes"
 propertyvalue(p::MarketSecDes) = p.value
 
 struct SecurityType <: AbstractProperty
     value::String
+
+    function SecurityType(value::String; validation_policy::Symbol=:error)
+        validate_enum("securityType", value; validation_policy)
+        new(value)
+    end
 end
 propertykey(::SecurityType) = "securityType"
 propertyvalue(p::SecurityType) = p.value
 
 struct SecurityType2 <: AbstractProperty
     value::String
+
+    function SecurityType2(value::String; validation_policy::Symbol=:error)
+        validate_enum("securityType2", value; validation_policy)
+        new(value)
+    end
 end
 propertykey(::SecurityType2) = "securityType2"
 propertyvalue(p::SecurityType2) = p.value
@@ -83,6 +108,11 @@ const Maturity = Base.Fix1(Interval{Date}, "maturity")
 
 struct StateCode <: AbstractProperty
     value::String
+
+    function StateCode(value::String; validation_policy::Symbol=:error)
+        validate_enum("stateCode", value; validation_policy)
+        new(value)
+    end
 end
 propertykey(::StateCode) = "stateCode"
 propertyvalue(p::StateCode) = p.value
