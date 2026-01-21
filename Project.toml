@@ -2,3 +2,6 @@ name = "OpenFIGI"
 uuid = "853cdae6-d31d-485b-952e-6d292502e0c8"
 version = "0.1.0"
 authors = ["Kyle S. Johnston <KyleSJohnston@users.noreply.github.com>"]
+
+[compat]
+julia = "1.10"
