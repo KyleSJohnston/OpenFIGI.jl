@@ -92,9 +92,14 @@ struct Interval{T} <: AbstractProperty
         new(key, lbound, ubound)
     end
 end
+Interval(key::String, lbound::T, ubound::T) where {T} = Interval{T}(key, lbound, ubound)
 Interval(key::String, lbound::T, ubound::Nothing) where {T} = Interval{T}(key, lbound, ubound)
 Interval(key::String, lbound::Nothing, ubound::T) where {T} = Interval{T}(key, lbound, ubound)
-# TODO: consider promote(lbound, ubound)
+function Interval(key::String, lbound::Number, ubound::Number)
+    lbound, ubound = promote(lbound, ubound)
+    T = typeof(lbound)
+    return Interval{T}(key, lbound, ubound)
+end
 
 propertykey(interval::Interval) = interval.key
 propertyvalue(interval::Interval) = [interval.lbound, interval.ubound]

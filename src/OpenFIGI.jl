@@ -1,3 +1,8 @@
+"""
+Functionality to access the OpenFIGI API
+
+See [the python example](https://github.com/OpenFIGI/api-examples/blob/main/python/example.py).
+"""
 module OpenFIGI
 
 # Functions
