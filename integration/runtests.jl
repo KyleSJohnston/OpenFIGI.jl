@@ -4,6 +4,25 @@ using Test
 
 ENV["JULIA_DEBUG"] = OpenFIGI
 
+@testset "identifiers" begin
+    id = Identifier("ID_BB_GLOBAL", "BBG000000000")
+    @test id isa Identifier
+    @test id.idType == "ID_BB_GLOBAL"
+    @test id.idValue == "BBG000000000"
+
+    @test_throws OpenFIGI.InvalidEnumerationError Identifier("UNKNOWN", "XYZ"; validation_policy=:error)  # :error is the default
+    id = @test_logs (:warn, "UNKNOWN is not an enumerated value for idType") Identifier("UNKNOWN", "XYZ"; validation_policy=:warning)
+    @test id isa Identifier
+    @test id.idType == "UNKNOWN"
+    @test id.idValue == "XYZ"
+
+    id = @test_nowarn Identifier("UNKNOWN", "XYZ"; validation_policy=:skip)
+    @test id isa Identifier
+    @test id.idType == "UNKNOWN"
+    @test id.idValue == "XYZ"
+
+    @test_throws ArgumentError Identifier("ID_BB_GLOBAL", "BBG000000000"; validation_policy=:none)
+end
 
 @testset "mapping/values" begin
     obj = OpenFIGI.mapping_values("idType")
@@ -37,6 +56,5 @@ end
     obj = OpenFIGI.mapping(jobs)
     @test obj isa Vector{<:OpenFIGI.AbstractResponse}
     @test length(obj) == length(jobs)
-    println(eltype(obj))
     @test obj[1] isa OpenFIGI.DataResponse
 end

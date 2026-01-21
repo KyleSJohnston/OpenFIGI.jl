@@ -26,10 +26,6 @@ function get_mapping_values(key::AbstractString)
     )
 end
 
-function parse_mapping_value_response(response::HTTP.Response)
-    return JSON.parse(response.body, AbstractResponse)
-end
-
 function mapping_values(key::AbstractString)
     response = get_mapping_values(key)
     return JSON.parse(response.body, AbstractResponse)
@@ -70,4 +66,30 @@ function cache_enums(; refresh::Bool=false)
     for key in ALLOWABLE_KEYS
         _ = enum_values(key; refresh)
     end
+end
+
+struct InvalidEnumerationError <: Exception
+    key::String
+    value::String
+end
+
+function Base.showerror(io::IO, err::InvalidEnumerationError)
+    print(io, "InvalidEnumerationError: ", err.value, " is not an enumerated value for ", err.key)
+end
+
+function validate_enum(key::String, value::String; validation_policy::Symbol=:error)
+    validation_policy == :skip || validation_policy == :warning || validation_policy == :error || throw(ArgumentError("invalid policy $validation_policy"))
+    if validation_policy == :skip
+        return
+    end
+
+    possible_values = enum_values(key)
+    if value ∉ possible_values
+        if validation_policy == :error
+            throw(InvalidEnumerationError(key, value))
+        else
+            @warn "$value is not an enumerated value for $key"
+        end
+    end
+
 end

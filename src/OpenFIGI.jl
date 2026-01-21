@@ -54,10 +54,10 @@ function make_request_headers()::Dict{String, String}
     return headers
 end
 
-include("identifiers.jl")
-include("properties.jl")
 include("responses.jl")
-include("enumerations.jl")
+include("enumerations.jl")  # requires responses
+include("identifiers.jl")   # requires enumerations for validation
+include("properties.jl")    # requires enumerations for validation
 include("mapping.jl")
 
 # placeholders
