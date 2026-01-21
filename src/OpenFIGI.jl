@@ -1,8 +1,13 @@
 module OpenFIGI
 
+using HTTP
+using JSON
+
 public set_apikey
 
+const URI_BASE = "https://api.openfigi.com"
 const APIKEY = Ref{Union{Nothing, String}}(nothing)
+const STATUS_EXCEPTION = true  # TODO: determine correct value
 
 """
     set_apikey(apikey)
@@ -22,5 +27,32 @@ function get_apikey()
     return APIKEY[]
 end
 
+"""
+    make_request_headers()
+"""
+function make_request_headers()::Dict{String, String}
+    headers = Dict("Content-Type" => "application/json")
+    apikey = get_apikey()
+    if !isnothing(apikey)
+        headers["X-OPENFIGI-APIKEY"] = apikey
+    end
+    return headers
+end
+
+include("responses.jl")
+include("enumerations.jl")
+
+# placeholders
+function post_mapping()
+    error("not yet implemented")
+end
+
+function post_search()
+    error("not yet implemented")
+end
+
+function post_filter()
+    error("not yet implemented")
+end
 
 end # module OpenFIGI

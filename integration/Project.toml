@@ -1,0 +1,3 @@
+[deps]
+OpenFIGI = "853cdae6-d31d-485b-952e-6d292502e0c8"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
