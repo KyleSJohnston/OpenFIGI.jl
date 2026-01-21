@@ -1,12 +1,7 @@
 module OpenFIGI
 
-using Dates: Date
-using HTTP
-using JSON
-using Logging
-
-export Identifier
-public set_apikey
+# Functions
+public set_apikey, cache_enums
 
 # Identifiers
 export Identifier, Ticker
@@ -18,6 +13,12 @@ export Expiration, Maturity, StateCode
 
 # Structs
 export MappingJob
+
+using Dates: Date
+using HTTP
+using JSON
+using Logging
+using Scratch
 
 const URI_BASE = "https://api.openfigi.com"
 const APIKEY = Ref{Union{Nothing, String}}(nothing)

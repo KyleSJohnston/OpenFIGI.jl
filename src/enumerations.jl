@@ -34,3 +34,40 @@ function mapping_values(key::AbstractString)
     response = get_mapping_values(key)
     return JSON.parse(response.body, AbstractResponse)
 end
+
+function read_enum_values(key::AbstractString; refresh::Bool=false)
+    validatekey(key)
+    filepath = joinpath(@get_scratch!("enums"), "$key.json")
+    if refresh || !isfile(filepath)
+        response = mapping_values(key)::ValuesResponse
+        open(filepath, write=true) do io
+            JSON.json(io, response.values)
+        end
+        return response.values
+    else
+        return JSON.parsefile(filepath)
+    end
+end
+
+const ENUM_VALUES = Dict{String, Vector{String}}()
+
+function enum_values(key::AbstractString; refresh::Bool=false)
+    validatekey(key)
+    if refresh || !haskey(ENUM_VALUES, key)
+        ENUM_VALUES[key] = read_enum_values(key; refresh)
+    end
+    return ENUM_VALUES[key]
+end
+
+"""
+    cache_enums(; refresh=false)
+
+Caches enumeration values in a global dictionary for quick access. If
+`refresh` is true, forces the enumeration values to be queried from
+the API instead of loaded from the scratch space.
+"""
+function cache_enums(; refresh::Bool=false)
+    for key in ALLOWABLE_KEYS
+        _ = enum_values(key; refresh)
+    end
+end
