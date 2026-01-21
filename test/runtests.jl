@@ -9,3 +9,5 @@ using Test
     OpenFIGI.set_apikey(nothing)
     @test isnothing(OpenFIGI.get_apikey())
 end
+
+# TODO: unit tests for Interval

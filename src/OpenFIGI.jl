@@ -1,9 +1,23 @@
 module OpenFIGI
 
+using Dates: Date
 using HTTP
 using JSON
+using Logging
 
+export Identifier
 public set_apikey
+
+# Identifiers
+export Identifier, Ticker
+
+# Properties
+export ExchCode, MICCode, Currency, MarketSecDes, SecurityType, SecurityType2
+export IncludeUnlistedEquities, OptionType, Strike, ContractSize, Coupon
+export Expiration, Maturity, StateCode
+
+# Structs
+export MappingJob
 
 const URI_BASE = "https://api.openfigi.com"
 const APIKEY = Ref{Union{Nothing, String}}(nothing)
@@ -39,14 +53,13 @@ function make_request_headers()::Dict{String, String}
     return headers
 end
 
+include("identifiers.jl")
+include("properties.jl")
 include("responses.jl")
 include("enumerations.jl")
+include("mapping.jl")
 
 # placeholders
-function post_mapping()
-    error("not yet implemented")
-end
-
 function post_search()
     error("not yet implemented")
 end

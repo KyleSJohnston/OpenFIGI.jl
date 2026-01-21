@@ -29,3 +29,8 @@ end
 function parse_mapping_value_response(response::HTTP.Response)
     return JSON.parse(response.body, AbstractResponse)
 end
+
+function mapping_values(key::AbstractString)
+    response = get_mapping_values(key)
+    return JSON.parse(response.body, AbstractResponse)
+end
