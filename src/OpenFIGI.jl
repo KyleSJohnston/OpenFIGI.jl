@@ -4,7 +4,13 @@ module OpenFIGI
 public set_apikey, cache_enums
 
 # Identifiers
-export Identifier, Ticker
+export Identifier
+export BarclaysTicker, BaseTicker, CompositeIDBBGlobal, IDBB, IDBB8Chr
+export IDBBGlobal, IDBBGlobalShareClassLevel, IDBBSecNumDes, IDBBUnique, CINS
+export Common, CUSIP, CUSIP8Chr, ExchangeSymbol, FullExchangeSymbol, ISIN
+export Italy, SEDOL, ShortCode, Trace, Wertpapier, OCCSymbol, OPRASymbol
+export Ticker, TradebookTicker, TradingSystemIdentifier, UniqueIDFutOpt
+export VendorIndexCode
 
 # Properties
 export ExchCode, MICCode, Currency, MarketSecDes, SecurityType, SecurityType2

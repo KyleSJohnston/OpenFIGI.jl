@@ -100,11 +100,11 @@ propertykey(interval::Interval) = interval.key
 propertyvalue(interval::Interval) = [interval.lbound, interval.ubound]
 
 # TODO: restrict types
-const Strike = Base.Fix1(Interval, "strike")
-const ContractSize = Base.Fix1(Interval, "contractSize")
-const Coupon = Base.Fix1(Interval, "coupon")
-const Expiration = Base.Fix1(Interval{Date}, "expiration")
-const Maturity = Base.Fix1(Interval{Date}, "maturity")
+Strike = Base.Fix1(Interval, "strike")
+ContractSize = Base.Fix1(Interval, "contractSize")
+Coupon = Base.Fix1(Interval, "coupon")
+Expiration = Base.Fix1(Interval{Date}, "expiration")
+Maturity = Base.Fix1(Interval{Date}, "maturity")
 
 struct StateCode <: AbstractProperty
     value::String
