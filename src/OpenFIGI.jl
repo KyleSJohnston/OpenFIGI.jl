@@ -66,14 +66,7 @@ include("enumerations.jl")  # requires responses
 include("identifiers.jl")   # requires enumerations for validation
 include("properties.jl")    # requires enumerations for validation
 include("mapping.jl")
-
-# placeholders
-function post_search()
-    error("not yet implemented")
-end
-
-function post_filter()
-    error("not yet implemented")
-end
+include("search.jl")
+include("filter.jl")
 
 end # module OpenFIGI
