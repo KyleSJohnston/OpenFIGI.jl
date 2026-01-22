@@ -3,7 +3,7 @@ abstract type AbstractProperty end
 
 propertykey(::AbstractProperty) = error("subtypes of AbstractProperty must implement `propertykey`")
 propertyvalue(::AbstractProperty) = error("subtypes of AbstractProperty must implement `propertyvalue`")
-Base.convert(Pair, p::AbstractProperty) = Pair(propertykey(p), propertyvalue(p))
+Base.convert(::Type{Pair}, p::AbstractProperty) = Pair(propertykey(p), propertyvalue(p))
 
 
 struct ExchCode <: AbstractProperty
@@ -90,6 +90,7 @@ struct Interval{T} <: AbstractProperty
         new(key, lbound, ubound)
     end
 end
+Interval(::String, ::Nothing, ::Nothing) = throw(ArgumentError("Interval requires either lbound or ubound"))
 Interval(key::String, lbound::T, ubound::T) where {T} = Interval{T}(key, lbound, ubound)
 Interval(key::String, lbound::T, ubound::Nothing) where {T} = Interval{T}(key, lbound, ubound)
 Interval(key::String, lbound::Nothing, ubound::T) where {T} = Interval{T}(key, lbound, ubound)
