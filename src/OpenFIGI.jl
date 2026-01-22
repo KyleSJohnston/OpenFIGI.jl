@@ -27,6 +27,7 @@ export Expiration, Maturity, StateCode
 
 # Structs
 export MappingJob
+export DataResponse, ErrorResponse, WarningResponse
 
 using Dates: Date
 using HTTP

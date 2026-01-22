@@ -4,6 +4,13 @@ using Test
 
 ENV["JULIA_DEBUG"] = OpenFIGI
 
+const AAPL_FIGI = "BBG000B9XRY4"
+const IBM_FIGI = "BBG000BLNNH6"
+const NVDA_FIGI = "BBG000BBJQV0"
+
+aapl_job = MappingJob(Ticker("AAPL"), ExchCode("US"), SecurityType2("Common Stock"))
+ibm_job = MappingJob(Ticker("IBM"), ExchCode("US"), SecurityType2("Common Stock"))
+
 @testset "enum loading" begin
     for key in OpenFIGI.ALLOWABLE_KEYS
         values = OpenFIGI.enum_values(key)
@@ -89,9 +96,61 @@ mapping_channel() do chnl
         @test obj[1] isa OpenFIGI.DataResponse
     end
 
-    # TODO: channel mapping with batching
-    # TODO: vector mapping that uses channel mapping
-    # TODO: single mapping that calls vector mapping
-    # TODO: single mapping constructing job in function
+    @testset "channel mapping" begin
+
+        # set up channels for jobs and results
+        job_channel = Channel{MappingJob}(1)
+        results_channel = Channel{OpenFIGI.AbstractResponse}(1)
+
+        # add one job to the job channel
+        put!(job_channel, aapl_job)
+        close(job_channel)
+        @test !isopen(job_channel)
+
+        mapping_task = mapping(chnl, job_channel, results_channel)
+        @test mapping_task isa Task
+
+        result = only(collect(results_channel))
+        # verify channel state
+        @test !isopen(results_channel)
+        @test isempty(results_channel)
+
+        # verify task state
+        @test istaskdone(mapping_task)
+
+        # verify result
+        @test result isa DataResponse
+        @test length(result.data) == 1
+        @test result.data[1].compositeFIGI == AAPL_FIGI
+    end
+
+    @testset "vector mapping" begin
+        jobs = [aapl_job, ibm_job]
+        results = mapping(chnl, jobs)
+        @test length(results) == 2
+        (aapl_result, ibm_result) = results
+
+        @test aapl_result isa DataResponse
+        @test length(aapl_result.data) == 1
+        @test aapl_result.data[1].compositeFIGI == AAPL_FIGI
+
+        @test ibm_result isa DataResponse
+        @test length(ibm_result.data) == 1
+        @test ibm_result.data[1].compositeFIGI == IBM_FIGI
+    end
+
+    @testset "single mapping" begin
+        result = mapping(chnl, ibm_job)
+        @test result isa DataResponse
+        @test length(result.data) == 1
+        @test result.data[1].compositeFIGI == IBM_FIGI
+    end
+
+    @testset "create job in `mapping`" begin
+        result = mapping(chnl, Ticker("NVDA"), ExchCode("US"), SecurityType2("Common Stock"))
+        @test result isa DataResponse
+        @test length(result.data) == 1
+        @test result.data[1].compositeFIGI == NVDA_FIGI
+    end
 
 end
