@@ -1,3 +1,5 @@
+using Aqua
+using JET
 using OpenFIGI
 using Test
 
@@ -12,3 +14,12 @@ using Test
 end
 
 # TODO: unit tests for Interval
+
+@testset "Source Code Tests" begin
+    @testset "Code quality (Aqua.jl)" begin
+        Aqua.test_all(OpenFIGI)
+    end
+    @testset "Code linting (JET.jl)" begin
+        JET.test_package(OpenFIGI; target_modules = (OpenFIGI,))
+    end
+end
