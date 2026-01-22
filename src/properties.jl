@@ -6,8 +6,6 @@ propertyvalue(::AbstractProperty) = error("subtypes of AbstractProperty must imp
 Base.convert(Pair, p::AbstractProperty) = Pair(propertykey(p), propertyvalue(p))
 
 
-# TODO: add validation
-
 struct ExchCode <: AbstractProperty
     value::String
 

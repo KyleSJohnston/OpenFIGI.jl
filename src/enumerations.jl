@@ -38,10 +38,12 @@ function handle_mapping_values_response(response::HTTP.Response)
     end
 end
 
+# TODO: document this
 function mapping_values(key::AbstractString)
     return handle_mapping_values_response(get_mapping_values(key))
 end
 
+# TODO: document this
 function mapping_values(tasks::Channel{Task}, key::AbstractString)
     t = @task get_mapping_values(key)
     t.sticky = false

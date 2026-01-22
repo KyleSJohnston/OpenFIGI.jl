@@ -33,7 +33,8 @@ function handle_mapping_response(response::HTTP.Response)
     return JSON.parse(response.body, Vector{AbstractResponse})
 end
 
-function mapping(jobs::Vector{MappingJob})
+# TODO: document this
+function mapping(jobs::Vector{MappingJob})::Vector{<:AbstractResponse}
     return handle_mapping_response(post_mapping(jobs))
 end
 
@@ -46,6 +47,7 @@ function _add_results!(results::Channel{<:AbstractResponse}, tasks::Vector{Task}
     end
 end
 
+# TODO: document this
 function mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Channel{<:AbstractResponse})::Task
     batch_size = maxjobs()
     @debug "mapping jobs from a channel in batches of $batch_size"
@@ -76,6 +78,7 @@ function mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Chann
     return results_task
 end
 
+# TODO: document this
 function mapping(tasks::Channel{Task}, jobs::Vector{MappingJob})::Vector{AbstractResponse}
     # prepare results
     results_channel = Channel{AbstractResponse}(maxjobs())
@@ -94,10 +97,12 @@ function mapping(tasks::Channel{Task}, jobs::Vector{MappingJob})::Vector{Abstrac
     return fetch(results_task)
 end
 
+# TODO: document this
 function mapping(tasks::Channel{Task}, job::MappingJob)::AbstractResponse
     return only(mapping(tasks, [job]))
 end
 
+# TODO: document this
 function mapping(tasks::Channel{Task}, identifier::Identifier, properties::AbstractProperty...)::AbstractResponse
     return mapping(tasks, MappingJob(identifier, properties...))
 end
