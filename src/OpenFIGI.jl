@@ -7,6 +7,9 @@ module OpenFIGI
 
 # Functions
 public set_apikey, cache_enums
+export mapping_channel, search_channel
+public mapping_values  # enumerations.jl
+export mapping  # mapping.jl
 
 # Identifiers
 export Identifier
@@ -66,6 +69,7 @@ function make_request_headers()::Dict{String, String}
     return headers
 end
 
+include("rate_limit.jl")
 include("responses.jl")
 include("enumerations.jl")  # requires responses
 include("identifiers.jl")   # requires enumerations for validation

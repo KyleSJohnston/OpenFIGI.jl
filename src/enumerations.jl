@@ -26,20 +26,39 @@ function get_mapping_values(key::AbstractString)
     )
 end
 
+function handle_mapping_values_response(response::HTTP.Response)
+    obj = JSON.parse(response.body, AbstractResponse)
+    if obj isa ErrorResponse
+        error(obj.error)
+    elseif obj isa WarningResponse
+        error(obj.warning)
+    else
+        # ValuesResponse
+        return obj.values
+    end
+end
+
 function mapping_values(key::AbstractString)
-    response = get_mapping_values(key)
-    return JSON.parse(response.body, AbstractResponse)
+    return handle_mapping_values_response(get_mapping_values(key))
+end
+
+function mapping_values(tasks::Channel{Task}, key::AbstractString)
+    t = @task get_mapping_values(key)
+    t.sticky = false
+    put!(tasks, t)
+    response = fetch(t)
+    return handle_mapping_values_response(response)
 end
 
 function read_enum_values(key::AbstractString; refresh::Bool=false)
     validatekey(key)
     filepath = joinpath(@get_scratch!("enums"), "$key.json")
     if refresh || !isfile(filepath)
-        response = mapping_values(key)::ValuesResponse
+        values = mapping_values(key)::Vector{String}
         open(filepath, write=true) do io
-            JSON.json(io, response.values)
+            JSON.json(io, values)
         end
-        return response.values
+        return values
     else
         return JSON.parsefile(filepath)
     end

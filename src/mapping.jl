@@ -29,7 +29,18 @@ function post_mapping(jobs::Vector{MappingJob})
     )
 end
 
-function mapping(jobs::Vector{MappingJob})
-    response = post_mapping(jobs)
+function handle_mapping_response(response::HTTP.Response)
     return JSON.parse(response.body, Vector{AbstractResponse})
+end
+
+function mapping(jobs::Vector{MappingJob})
+    return handle_mapping_response(post_mapping(jobs))
+end
+
+function mapping(tasks::Channel{Task}, jobs::Vector{MappingJob})
+    t = @task post_mapping(jobs)
+    t.sticky = false
+    put!(tasks, t)
+    response = fetch(t)
+    return handle_mapping_response(response)
 end
