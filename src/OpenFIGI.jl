@@ -17,6 +17,7 @@ using Scratch
 export mapping_channel, search_channel
 @compat public mapping_values  # enumerations.jl
 export mapping  # mapping.jl
+export search  # search.jl
 
 # Identifiers
 export Identifier

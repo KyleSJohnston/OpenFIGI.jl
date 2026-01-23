@@ -16,8 +16,9 @@ struct Instrument
 end
 
 "OpenFIGI API response with instruments"
-struct DataResponse <: AbstractResponse
+@defaults struct DataResponse <: AbstractResponse
     data::Vector{Instrument}
+    next::Union{Nothing, String} = nothing
 end
 
 "OpenFIGI API response enumeration values"
