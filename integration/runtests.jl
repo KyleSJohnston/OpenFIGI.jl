@@ -2,7 +2,7 @@ using Dates: Date
 using OpenFIGI
 using Test
 
-ENV["JULIA_DEBUG"] = OpenFIGI
+# ENV["JULIA_DEBUG"] = OpenFIGI
 
 const AAPL_FIGI = "BBG000B9XRY4"
 const IBM_FIGI = "BBG000BLNNH6"

@@ -1,5 +1,26 @@
 ## https://www.openfigi.com/api/documentation#v3-post-mapping
 
+"""
+    MappingJob(identifier, properties...)
+
+A request for mapping from `identifier` to FIGIs
+
+# Arguments
+- `identifier::Identifier`: an identifier to map to FIGI
+- `properties::AbstractProperty...`: optional properties for limiting results
+
+# Examples
+
+```jldoctest
+julia> MappingJob(Ticker("NVDA"), ExchCode("US"), SecurityType2("Common Stock"))
+MappingJob(Identifier("TICKER", "NVDA"), (ExchCode("US"), SecurityType2("Common Stock")))
+
+julia> MappingJob(IDBBGlobal("BBG000BLNNH6"))
+MappingJob(Identifier("ID_BB_GLOBAL", "BBG000BLNNH6"), ())
+```
+
+See Request Format for the [mapping endpoint](https://www.openfigi.com/api/documentation#v3-post-mapping).
+"""
 struct MappingJob
     identifier::Identifier
     properties::Tuple{Vararg{AbstractProperty}}
@@ -19,6 +40,11 @@ end
 # https://www.openfigi.com/api/documentation#rate-limits
 maxjobs() = isnothing(get_apikey()) ? 10 : 100
 
+"""
+    post_mapping(jobs)
+
+Submits `jobs` as a POST request to the mapping endpoint
+"""
 function post_mapping(jobs::Vector{MappingJob})
     length(jobs) <= maxjobs() || throw(ArgumentError("too many jobs: $(length(jobs))"))
     return HTTP.post(
@@ -29,11 +55,24 @@ function post_mapping(jobs::Vector{MappingJob})
     )
 end
 
+"""
+    handle_mapping_response(response)
+
+Parses `response` as a vector of AbstractResponse instances
+"""
 function handle_mapping_response(response::HTTP.Response)
     return JSON.parse(response.body, Vector{AbstractResponse})
 end
 
-# TODO: document this
+"""
+    mapping(jobs)
+
+Makes a single mapping request from `jobs` to the OpenFIGI API
+
+While this method works fine for a single request, [`mapping(tasks, jobs)`](@ref)
+is preferred for most use cases for the convenience of batching and abiding by
+the rate limits.
+"""
 function mapping(jobs::Vector{MappingJob})::Vector{<:AbstractResponse}
     return handle_mapping_response(post_mapping(jobs))
 end
@@ -47,7 +86,20 @@ function _add_results!(results::Channel{<:AbstractResponse}, tasks::Vector{Task}
     end
 end
 
-# TODO: document this
+"""
+    mapping(tasks, jobs, results)
+
+Spawn a `mapping` task that processes `jobs` in batches and populates 
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `jobs::Channel{MappingJob}`: the jobs to send to the mapping endpoint
+- `results::Channel{<:AbstractResponse}`: the mapping results in the same order as `jobs`
+
+The task returned from this method is bound to `results`. If one of the batches
+should error, there will be fewer items in `results` than `jobs`. To detect the
+error state, simply `wait` on the task after consuming the values in `results`.
+"""
 function mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Channel{<:AbstractResponse})::Task
     batch_size = maxjobs()
     @debug "mapping jobs from a channel in batches of $batch_size"
@@ -78,7 +130,18 @@ function mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Chann
     return results_task
 end
 
-# TODO: document this
+"""
+    mapping(tasks, jobs)
+
+Submits `jobs` to the mapping endpoint as scheduled by `tasks`
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `jobs::Vector{MappingJob}`: the jobs to send to the mapping endpoint
+
+Internally, this method uses [`mapping(tasks, jobs, results)`](@ref) for the
+batching logic.
+"""
 function mapping(tasks::Channel{Task}, jobs::Vector{MappingJob})::Vector{AbstractResponse}
     # prepare results
     results_channel = Channel{AbstractResponse}(maxjobs())
@@ -92,17 +155,40 @@ function mapping(tasks::Channel{Task}, jobs::Vector{MappingJob})::Vector{Abstrac
     end
 
     # queue mapping
-    mapping(tasks, job_channel, results_channel)
+    t = mapping(tasks, job_channel, results_channel)
 
-    return fetch(results_task)
+    results = fetch(results_task)
+    wait(t)  # raise any errors encountered
+    return results
 end
 
-# TODO: document this
+"""
+    mapping(tasks, job)
+
+Submits `job` to the mapping endpoint as scheduled by `tasks`
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `job::MappingJob`: the job to send to the mapping endpoint
+
+Internally, this method uses [`mapping(tasks, jobs)`](@ref).
+"""
 function mapping(tasks::Channel{Task}, job::MappingJob)::AbstractResponse
     return only(mapping(tasks, [job]))
 end
 
-# TODO: document this
+"""
+    mapping(tasks, identifier, properties...)
+
+Submits a `MappingJob` constructed from `identifer` and `properties` to the
+mapping endpoint as scheduled by `tasks`
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `job::MappingJob`: the job to send to the mapping endpoint
+
+Internally, this method uses [`mapping(tasks, jobs)`](@ref).
+"""
 function mapping(tasks::Channel{Task}, identifier::Identifier, properties::AbstractProperty...)::AbstractResponse
     return mapping(tasks, MappingJob(identifier, properties...))
 end

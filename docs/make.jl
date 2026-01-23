@@ -1,6 +1,8 @@
 using Documenter
 using OpenFIGI
 
+DocMeta.setdocmeta!(OpenFIGI, :DocTestSetup, :(using OpenFIGI); recursive=true)
+
 makedocs(
     sitename="OpenFIGI.jl",
     modules = [OpenFIGI],
