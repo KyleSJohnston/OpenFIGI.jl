@@ -1,5 +1,6 @@
 abstract type AbstractResponse end
 
+"Instrument object returned from the OpenFIGI API"
 struct Instrument
     figi::String
     securityType::Union{String, Nothing}
@@ -14,18 +15,22 @@ struct Instrument
     metadata::Union{String, Nothing}
 end
 
+"OpenFIGI API response with instruments"
 struct DataResponse <: AbstractResponse
     data::Vector{Instrument}
 end
 
+"OpenFIGI API response enumeration values"
 struct ValuesResponse <: AbstractResponse
     values::Vector{String}
 end
 
+"OpenFIGI API response indicating an error with the request"
 struct ErrorResponse <: AbstractResponse
     error::String
 end
 
+"OpenFIGI API response when no FIGI is found"
 struct WarningResponse <: AbstractResponse
     warning::String
 end
@@ -46,8 +51,3 @@ function responsetype(x)
 end
 
 JSON.@choosetype AbstractResponse responsetype
-
-function parse_response(response::HTTP.Response)
-    @debug "parsing response..." response
-    return JSON.parse(response.body, AbstractResponse)
-end

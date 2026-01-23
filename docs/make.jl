@@ -7,6 +7,12 @@ makedocs(
     sitename="OpenFIGI.jl",
     modules = [OpenFIGI],
     checkdocs = :public,
+    pages = [
+        "index.md",
+        "interface.md",
+        "identifiers.md",
+        "mapping.md",
+    ],
 )
 
 # deploydocs(

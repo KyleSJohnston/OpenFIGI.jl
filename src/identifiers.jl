@@ -155,6 +155,10 @@ An exchange venue specific code to identify fixed income instruments primarily
 traded in Asia.
 """
 ShortCode = Base.Fix1(Identifier, "ID_SHORT_CODE")
+
+"""
+    Trace(value)
+"""
 Trace = Base.Fix1(Identifier, "ID_TRACE")
 
 """
