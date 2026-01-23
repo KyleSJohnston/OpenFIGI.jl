@@ -5,10 +5,17 @@ See [the python example](https://github.com/OpenFIGI/api-examples/blob/main/pyth
 """
 module OpenFIGI
 
+using Compat
+using Dates: Date
+using HTTP
+using JSON
+using Logging
+using Scratch
+
 # Functions
-public set_apikey, cache_enums
+@compat public set_apikey, cache_enums
 export mapping_channel, search_channel
-public mapping_values  # enumerations.jl
+@compat public mapping_values  # enumerations.jl
 export mapping  # mapping.jl
 
 # Identifiers
@@ -30,11 +37,6 @@ export MappingJob
 export Instrument
 export DataResponse, ErrorResponse, WarningResponse, ValuesResponse
 
-using Dates: Date
-using HTTP
-using JSON
-using Logging
-using Scratch
 
 const URI_BASE = "https://api.openfigi.com"
 const APIKEY = Ref{Union{Nothing, String}}(nothing)
