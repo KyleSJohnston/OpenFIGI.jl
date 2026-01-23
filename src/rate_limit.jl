@@ -94,29 +94,69 @@ function rate_limit(tasks::Channel{Task})
     end
 end
 
+"""
+    mapping_channel()
+
+Creates a new channel for mapping tasks
+
+The resulting `Channel{Task}` instance is sized to hold one interval of request
+tasks and is bound to a new `Task` spawned to rate-limit the channel.
+"""
 function mapping_channel()::Channel{Task}
     size = isnothing(OpenFIGI.get_apikey()) ? 25 : 250
     return Channel{Task}(rate_limit, size; spawn=true)
 end
 
+"""
+    mapping_channel(f)
+
+Creates a channel for mapping tasks, runs `f` on that channel, and finally
+closes the channel.
+
+```julia
+nvda = search_channel() do ch
+    return mapping(ch, Ticker("NVDA"), ExchCode("US"), SecurityType2("Common Stock"))
+end
+```
+
+See [`mapping_channel()`](@ref)
+"""
 function mapping_channel(f::Function)
     chnl = mapping_channel()
     try
-        f(chnl)
+        return f(chnl)
     finally
         close(chnl)
     end
 end
 
+"""
+    search_channel()
+
+Creates a channel for search or filter tasks
+
+The resulting `Channel{Task}` instance is sized to hold one interval of search
+or filter tasks and is bound to a new `Task` spawned to rate-limit the channel.
+"""
 function search_channel()::Channel{Task}
     size = isnothing(OpenFIGI.get_apikey()) ? 5 : 20
     return Channel{Task}(rate_limit, size; spawn=true)
 end
 
+"""
+    search_channel(f)
+
+Creates a channel for search or filter tasks, runs `f` on that channel, and
+finally closes the channel.
+
+
+
+See [`search_channel()`](@ref)
+"""
 function search_channel(f::Function)
     chnl = search_channel()
     try
-        f(chnl)
+        return f(chnl)
     finally
         close(chnl)
     end

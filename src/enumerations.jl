@@ -38,12 +38,35 @@ function handle_mapping_values_response(response::HTTP.Response)
     end
 end
 
-# TODO: document this
+"""
+    mapping_values(key)
+
+Send a single API request to mapping/values/`key` to obtain enum-like values
+for `key`. Used implicitly via `cache_enums`
+
+See [`cache_enums()`](@ref)
+"""
 function mapping_values(key::AbstractString)
     return handle_mapping_values_response(get_mapping_values(key))
 end
 
-# TODO: document this
+"""
+    mapping_values(tasks, key)
+
+Send a single API request to mapping/values/`key` respecting the rate limits
+enforced by `tasks`. Equivalent to `mapping_values(key)` up to the rate limits
+imposed by `tasks`.
+
+Where possible or practical, this method is preferred.
+
+```julia
+chnl = mapping_channel() do ch
+    id_values = mapping_values(ch, "idType")
+end
+```
+
+See [`mapping_values(key)`](@ref)
+"""
 function mapping_values(tasks::Channel{Task}, key::AbstractString)
     t = @task get_mapping_values(key)
     t.sticky = false

@@ -37,7 +37,15 @@ using Scratch
 
 const URI_BASE = "https://api.openfigi.com"
 const APIKEY = Ref{Union{Nothing, String}}(nothing)
-const STATUS_EXCEPTION = true  # TODO: determine correct value
+# get_* and post_* functions are written with
+# `status_exception=STATUS_EXCEPTION`. The generic expectation is to provide
+# a synchronous interface in light of potentially malformed inputs. Therefore,
+# `mapping_channel` and `search_channel` allow for non-2XX reponses to raise
+# and close the channel. As such--a.k.a. without any kind of task recovery--
+# there is no reason to treat any non-2XX responses different from one another.
+# As every task is expected to produce an instance of HTTP.Response, this code
+# tolerates when `fetch(task)` raises instead.
+const STATUS_EXCEPTION = true
 
 """
     set_apikey(apikey)
