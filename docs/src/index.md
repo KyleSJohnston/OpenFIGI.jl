@@ -1,15 +1,9 @@
 # Home
 
-OpenFIGI is a Julia interface to the OpenFIGI API.
+OpenFIGI is a Julia interface to the [OpenFIGI API](https://www.openfigi.com/api/documentation).
 
-## Installation
+## Contents
 
-OpenFIGI.jl can be installed using `Pkg`.
-
-```julia
-pkg> add https://github.com/KyleSJohnston/OpenFIGI.jl#v0.1.0
+```@contents
+Pages = ["index.md", "start.md", "interface.md", "configuration.md", "mapping.md"]
 ```
-
-## Example Usage
-
-## Advanced Example

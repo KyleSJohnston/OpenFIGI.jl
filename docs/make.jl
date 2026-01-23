@@ -9,6 +9,7 @@ makedocs(
     checkdocs = :public,
     pages = [
         "index.md",
+        "start.md",
         "interface.md",
         "configuration.md",
         "mapping.md",

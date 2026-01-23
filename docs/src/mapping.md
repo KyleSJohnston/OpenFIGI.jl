@@ -18,6 +18,7 @@ mapping(::Vector{MappingJob})
 ## Responses
 
 ```@docs
+Instrument
 DataResponse
 ErrorResponse
 WarningResponse
@@ -27,4 +28,5 @@ WarningResponse
 
 ```@docs
 OpenFIGI.mapping_values
+ValuesResponse
 ```
