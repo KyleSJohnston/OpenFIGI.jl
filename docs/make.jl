@@ -10,7 +10,7 @@ makedocs(
     pages = [
         "index.md",
         "interface.md",
-        "identifiers.md",
+        "configuration.md",
         "mapping.md",
     ],
 )
