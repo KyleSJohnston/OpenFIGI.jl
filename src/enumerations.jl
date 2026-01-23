@@ -60,8 +60,8 @@ imposed by `tasks`.
 Where possible or practical, this method is preferred.
 
 ```julia
-chnl = mapping_channel() do ch
-    id_values = mapping_values(ch, "idType")
+id_values = mapping_channel() do ch
+    return mapping_values(ch, "idType")
 end
 ```
 
