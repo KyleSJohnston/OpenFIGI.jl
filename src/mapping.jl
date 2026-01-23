@@ -109,8 +109,11 @@ function mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Chann
     for job in jobs
         if length(batch_jobs) == batch_size
             @debug "batch is ready"
-            t = @task post_mapping(copy(batch_jobs))
-            t.sticky = false
+            t = let task_jobs = copy(batch_jobs)
+                t = @task post_mapping(task_jobs)
+                t.sticky = false
+                t
+            end
             push!(local_tasks, t)
             put!(tasks, t)
             empty!(batch_jobs)
@@ -119,8 +122,11 @@ function mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Chann
         push!(batch_jobs, job)
     end
     @debug "final batch"
-    t = @task post_mapping(batch_jobs)
-    t.sticky = false
+    t = let task_jobs = copy(batch_jobs)
+        t = @task post_mapping(task_jobs)
+        t.sticky = false
+        t
+    end
     push!(local_tasks, t)
     put!(tasks, t)
     @debug "final batch submitted"

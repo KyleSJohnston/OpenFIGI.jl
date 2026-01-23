@@ -139,6 +139,36 @@ mapping_channel() do chnl
         @test ibm_result.data[1].compositeFIGI == IBM_FIGI
     end
 
+    @testset "long vector mapping" begin
+        jobs = [
+            MappingJob(IDBBGlobal("BBG000B9XRY4"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000N9MNX3"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000B9XYV2"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000BPH459"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000MM2P62"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG005CPNTQ2"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000BSJK37"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000C6CFJ5"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000BQLTW7"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000HS77T5"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000BD2NY8"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000FY4S11"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG00BN96922"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000DWG505"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000B9Z0J8"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000B9ZXB4"), ExchCode("US")),
+            MappingJob(IDBBGlobal("BBG000BB29X4"), ExchCode("US")),
+        ]
+        @test length(jobs) > OpenFIGI.maxjobs()
+        results = mapping(chnl, jobs)
+        @test length(results) == length(jobs)
+        for (job, result) in Iterators.zip(jobs, results)
+            @test result isa DataResponse
+            @test length(result.data) == 1
+            @test result.data[1].compositeFIGI == job.identifier.idValue
+        end
+    end
+
     @testset "single mapping" begin
         result = mapping(chnl, ibm_job)
         @test result isa DataResponse
