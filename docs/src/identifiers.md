@@ -1,4 +1,12 @@
-# Identifiers
+# Job Configuration
+
+## Mapping Job
+
+```@docs
+MappingJob
+```
+
+## Identifiers
 
 ```@docs
 Identifier
@@ -30,4 +38,23 @@ TradebookTicker
 TradingSystemIdentifier
 UniqueIDFutOpt
 VendorIndexCode
+```
+
+## Properties
+
+```@docs
+ExchCode
+MICCode
+Currency
+MarketSecDes
+SecurityType
+SecurityType2
+IncludeUnlistedEquities
+OptionType
+Strike
+ContractSize
+Coupon
+Expiration
+Maturity
+StateCode
 ```

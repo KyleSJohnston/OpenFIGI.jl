@@ -1,12 +1,6 @@
 # Mapping
 
-## Mapping Job
-
-```@docs
-MappingJob
-```
-
-## Rate-Limited Mapping
+## Rate-Limited Methods
 
 ```@docs
 mapping(::Channel{Task}, ::Vector{MappingJob})
@@ -15,7 +9,7 @@ mapping(::Channel{Task}, ::Identifier, ::OpenFIGI.AbstractProperty...)
 mapping(::Channel{Task}, ::Channel{MappingJob}, ::Channel{<:OpenFIGI.AbstractResponse})
 ```
 
-## Direct Mapping
+## Direct Methods
 
 ```@docs
 mapping(::Vector{MappingJob})

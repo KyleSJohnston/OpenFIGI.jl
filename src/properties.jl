@@ -6,6 +6,9 @@ propertyvalue(::AbstractProperty) = error("subtypes of AbstractProperty must imp
 Base.convert(::Type{Pair}, p::AbstractProperty) = Pair(propertykey(p), propertyvalue(p))
 
 
+"""
+    ExchCode(value)
+"""
 struct ExchCode <: AbstractProperty
     value::String
 
@@ -18,6 +21,9 @@ propertykey(::ExchCode) = "exchCode"
 propertyvalue(p::ExchCode) = p.value
 
 
+"""
+    MICCode(value)
+"""
 struct MICCode <: AbstractProperty
     value::String
 
@@ -29,12 +35,18 @@ end
 propertykey(::MICCode) = "micCode"
 propertyvalue(p::MICCode) = p.value
 
+"""
+    Currency(value)
+"""
 struct Currency <: AbstractProperty
     value::String
 end
 propertykey(::Currency) = "currency"
 propertyvalue(p::Currency) = p.value
 
+"""
+    MarketSecDes(value)
+"""
 struct MarketSecDes <: AbstractProperty
     value::String
 
@@ -46,6 +58,9 @@ end
 propertykey(::MarketSecDes) = "marketSecDes"
 propertyvalue(p::MarketSecDes) = p.value
 
+"""
+    SecurityType(value)
+"""
 struct SecurityType <: AbstractProperty
     value::String
 
@@ -57,6 +72,9 @@ end
 propertykey(::SecurityType) = "securityType"
 propertyvalue(p::SecurityType) = p.value
 
+"""
+    SecurityType2(value)
+"""
 struct SecurityType2 <: AbstractProperty
     value::String
 
@@ -68,12 +86,18 @@ end
 propertykey(::SecurityType2) = "securityType2"
 propertyvalue(p::SecurityType2) = p.value
 
+"""
+    IncludeUnlistedEquities(value)
+"""
 struct IncludeUnlistedEquities <: AbstractProperty
     value::Bool
 end
 propertykey(::IncludeUnlistedEquities) = "includeUnlistedEquities"
 propertyvalue(p::IncludeUnlistedEquities) = p.value
 
+"""
+    OptionType(value)
+"""
 struct OptionType <: AbstractProperty
     value::String
 end
@@ -104,12 +128,34 @@ propertykey(interval::Interval) = interval.key
 propertyvalue(interval::Interval) = [interval.lbound, interval.ubound]
 
 # TODO: restrict types
+"""
+    Strike(lbound, ubound)
+"""
 Strike = Base.Fix1(Interval, "strike")
+
+"""
+    ContractSize(lbound, ubound)
+"""
 ContractSize = Base.Fix1(Interval, "contractSize")
+
+"""
+    Coupon(lbound, ubound)
+"""
 Coupon = Base.Fix1(Interval, "coupon")
+
+"""
+    Expiration(lbound, ubound)
+"""
 Expiration = Base.Fix1(Interval{Date}, "expiration")
+
+"""
+    Maturity(lbound, ubound)
+"""
 Maturity = Base.Fix1(Interval{Date}, "maturity")
 
+"""
+    StateCode(value)
+"""
 struct StateCode <: AbstractProperty
     value::String
 
