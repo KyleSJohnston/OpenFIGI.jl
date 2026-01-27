@@ -1,3 +1,11 @@
+module Search
+
+using HTTP
+using JSON
+using ..OpenFIGI: AbstractProperty, AbstractResponse, DataResponse, ErrorResponse, Instrument, make_request_headers, STATUS_EXCEPTION, URI_BASE
+
+export search
+
 """
     post_search(query, properties...; start)
 
@@ -83,3 +91,5 @@ function search(tasks::Channel{Task}, query::String, properties::AbstractPropert
     wait(search_task)
     return results
 end
+
+end  # module

@@ -91,4 +91,6 @@ include("mapping.jl")
 include("search.jl")
 include("filter.jl")
 
+using .Search
+
 end # module OpenFIGI
