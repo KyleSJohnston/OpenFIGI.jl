@@ -44,7 +44,7 @@ function _response(task::Task)::DataResponse
     return response
 end
 
-function _add_results!(results::Channel{Instrument}, task::Task)
+function _add_search_results!(results::Channel{Instrument}, task::Task)
     response = fetch(task)::DataResponse
     for i in response.data
         put!(results, i)
@@ -64,7 +64,7 @@ function _search(tasks::Channel{Task}, results::Channel{Instrument}, query::Stri
     t.sticky = false
     put!(tasks, t)
     parsing_task = Threads.@spawn _response(t)
-    output_task = Threads.@spawn _add_results!(results, parsing_task)
+    output_task = Threads.@spawn _add_search_results!(results, parsing_task)
     next_task = Threads.@spawn _next_search(parsing_task, tasks, results, query, properties...)
     return Threads.@spawn waitall([output_task, next_task]; failfast=true)
 end

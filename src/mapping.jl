@@ -77,7 +77,7 @@ function mapping(jobs::Vector{MappingJob})::Vector{<:AbstractResponse}
     return handle_mapping_response(post_mapping(jobs))
 end
 
-function _add_results!(results::Channel{<:AbstractResponse}, tasks::Vector{Task})
+function _add_mapping_results!(results::Channel{<:AbstractResponse}, tasks::Vector{Task})
     for t in tasks
         response = fetch(t)
         for r in handle_mapping_response(response)
@@ -131,7 +131,7 @@ function mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Chann
     put!(tasks, t)
     @debug "final batch submitted"
 
-    results_task = Threads.@spawn _add_results!(results, local_tasks)
+    results_task = Threads.@spawn _add_mapping_results!(results, local_tasks)
     bind(results, results_task)
     return results_task
 end
