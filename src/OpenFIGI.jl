@@ -17,7 +17,8 @@ using Scratch
 export mapping_channel, search_channel
 @compat public mapping_values  # enumerations.jl
 export mapping  # mapping.jl
-export search  # search.jl
+export search_instruments  # search.jl
+export filter_instruments  # filter.jl
 
 # Identifiers
 export Identifier
@@ -92,5 +93,6 @@ include("search.jl")
 include("filter.jl")
 
 using .Search
+using .Filter
 
 end # module OpenFIGI

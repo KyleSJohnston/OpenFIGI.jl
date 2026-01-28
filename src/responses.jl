@@ -19,6 +19,7 @@ end
 @defaults struct DataResponse <: AbstractResponse
     data::Vector{Instrument}
     next::Union{Nothing, String} = nothing
+    total::Union{Nothing, Int} = nothing
 end
 
 "OpenFIGI API response enumeration values"

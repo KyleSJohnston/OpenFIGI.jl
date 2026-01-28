@@ -4,7 +4,7 @@ using HTTP
 using JSON
 using ..OpenFIGI: AbstractProperty, AbstractResponse, DataResponse, ErrorResponse, Instrument, make_request_headers, STATUS_EXCEPTION, URI_BASE
 
-export search
+export search_instruments
 
 """
     post_search(query, properties...; start)
@@ -36,7 +36,7 @@ function handle_search_response(response::HTTP.Response)
     return JSON.parse(response.body, AbstractResponse)
 end
 
-function search(query::String, properties::AbstractProperty...)::Vector{Instrument}
+function search_instruments(query::String, properties::AbstractProperty...)::Vector{Instrument}
     response = handle_search_response(post_search(query, properties...))
     if response isa ErrorResponse
         error(response.error)
@@ -77,16 +77,16 @@ function _search(tasks::Channel{Task}, results::Channel{Instrument}, query::Stri
     return Threads.@spawn waitall([output_task, next_task]; failfast=true)
 end
 
-function search(tasks::Channel{Task}, results::Channel{Instrument}, query::String, properties::AbstractProperty...)::Task
+function search_instruments(tasks::Channel{Task}, results::Channel{Instrument}, query::String, properties::AbstractProperty...)::Task
     t = _search(tasks, results, query, properties...)
     bind(results, t)
     return t
 end
 
 
-function search(tasks::Channel{Task}, query::String, properties::AbstractProperty...)::Vector{Instrument}
+function search_instruments(tasks::Channel{Task}, query::String, properties::AbstractProperty...)::Vector{Instrument}
     results_channel = Channel{Instrument}()
-    search_task = search(tasks, results_channel, query, properties...)
+    search_task = search_instruments(tasks, results_channel, query, properties...)
     results = collect(results_channel)
     wait(search_task)
     return results
