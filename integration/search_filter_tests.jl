@@ -4,7 +4,7 @@ using Test
 ENV["JULIA_DEBUG"] = OpenFIGI
 
 @testset "search" begin
-    results = search_instruments("Caterpillar", MarketSecDes("Equity"), SecurityType2("Common Stock"), ExchCode("US"))
+    results = instrument_search("Caterpillar", MarketSecDes("Equity"), SecurityType2("Common Stock"), ExchCode("US"))
     @test results isa Vector{Instrument}
     @test length(results) == 1
     @test results[1].compositeFIGI == "BBG000BF0K17"
@@ -13,7 +13,7 @@ end
 search_channel() do chnl
     @testset "paginated response search w/ channel" begin
         results_channel = Channel{Instrument}()
-        search_task = search_instruments(
+        search_task = instrument_search(
             chnl,
             results_channel,
             "Caterpillar",
@@ -28,7 +28,7 @@ search_channel() do chnl
     end
 
     @testset "paginated response search" begin
-        results = search_instruments(chnl, "Caterpillar", MarketSecDes("Equity"), SecurityType2("Common Stock"))
+        results = instrument_search(chnl, "Caterpillar", MarketSecDes("Equity"), SecurityType2("Common Stock"))
         @test results isa Vector{Instrument}
         @test length(results) > 125  # 158 as of 2026-01-23
         names = Set([i.name for i in results])
@@ -37,7 +37,7 @@ search_channel() do chnl
 
     @testset "paginated response filter w/ channel" begin
         results_channel = Channel{Instrument}()
-        filter_task = filter_instruments(
+        filter_task = instrument_filter(
             chnl,
             results_channel,
             MarketSecDes("Equity"),
@@ -52,7 +52,7 @@ search_channel() do chnl
     end
 
     @testset "paginated response search" begin
-        results = filter_instruments(chnl, MarketSecDes("Equity"), SecurityType2("Common Stock"), ExchCode("NZ"))
+        results = instrument_filter(chnl, MarketSecDes("Equity"), SecurityType2("Common Stock"), ExchCode("NZ"))
         @test results isa Vector{Instrument}
         @test length(results) > 105  # 115 as of 2026-01-27
         exch_codes = Set([i.exchCode for i in results])

@@ -4,7 +4,7 @@ using HTTP
 using JSON
 using ..OpenFIGI: AbstractProperty, AbstractResponse, DataResponse, ErrorResponse, Instrument, make_request_headers, STATUS_EXCEPTION, URI_BASE
 
-export filter_instruments
+export instrument_filter
 
 """
     post(query, properties...; start)
@@ -42,7 +42,7 @@ function handle_response(response::HTTP.Response)
     return JSON.parse(response.body, AbstractResponse)
 end
 
-function filter_instruments(properties::AbstractProperty...; query::Union{Nothing, String}=nothing)::Vector{Instrument}
+function instrument_filter(properties::AbstractProperty...; query::Union{Nothing, String}=nothing)::Vector{Instrument}
     response = handle_response(post(query, properties...))
     if response isa ErrorResponse
         error(response.error)
@@ -89,7 +89,7 @@ function _filter(
     return Threads.@spawn waitall([output_task, next_task]; failfast=true)
 end
 
-function filter_instruments(
+function instrument_filter(
     tasks::Channel{Task},
     results::Channel{Instrument},
     properties::AbstractProperty...;
@@ -101,13 +101,13 @@ function filter_instruments(
 end
 
 
-function filter_instruments(
+function instrument_filter(
     tasks::Channel{Task},
     properties::AbstractProperty...;
     query::Union{Nothing, String}=nothing,
 )::Vector{Instrument}
     results_channel = Channel{Instrument}()
-    search_task = filter_instruments(tasks, results_channel, properties...; query)
+    search_task = instrument_filter(tasks, results_channel, properties...; query)
     results = collect(results_channel)
     wait(search_task)
     return results
