@@ -1,3 +1,133 @@
-function post_search()
-    error("not yet implemented")
+module Search
+
+using HTTP
+using JSON
+using ..OpenFIGI: AbstractProperty, AbstractResponse, DataResponse, ErrorResponse, Instrument, make_request_headers, STATUS_EXCEPTION, URI_BASE
+
+export instrument_search
+
+"""
+    post_search(query, properties...; start)
+
+Submits `query` as a POST request to the search endpoint
+"""
+function post_search(query::String, properties::AbstractProperty...; start::Union{Nothing, String}=nothing)
+    obj = Dict(
+        "query" => query,
+        [convert(Pair, p) for p in properties]...
+    )
+    if !isnothing(start)
+        obj["start"] = start
+    end
+    return HTTP.post(
+        "$URI_BASE/v3/search",
+        make_request_headers(),
+        JSON.json(obj),
+        status_exception=STATUS_EXCEPTION,
+    )
 end
+
+"""
+    handle_search_response(response)
+
+Parses `response` as an AbstractResponse instance
+"""
+function handle_search_response(response::HTTP.Response)
+    return JSON.parse(response.body, AbstractResponse)
+end
+
+"""
+    instrument_search(query, properties...)
+
+Sends a single search query to the OpenFIGI API
+
+# Caveats
+- This method is primarily for testing.
+- This method does *not* support paginated responses, so no more than 100 results are returned.
+- This method does *not* attempt to manage requests to comply with rate limits.
+
+Use [`instrument_search(tasks, query, properties...)`](@ref) instead.
+"""
+function instrument_search(query::String, properties::AbstractProperty...)::Vector{Instrument}
+    response = handle_search_response(post_search(query, properties...))
+    if response isa ErrorResponse
+        error(response.error)
+    end
+    return response.data
+end
+
+function _response(task::Task)::DataResponse
+    response = handle_search_response(fetch(task))
+    if response isa ErrorResponse
+        error(response.error)
+    end
+    return response
+end
+
+function _add_search_results!(results::Channel{Instrument}, task::Task)
+    response = fetch(task)::DataResponse
+    for i in response.data
+        put!(results, i)
+    end
+end
+
+function _next_search(task::Task, search_args...)
+    response = fetch(task)::DataResponse
+    if !isnothing(response.next)
+        t = _search(search_args...; start=response.next)
+        wait(t)
+    end
+end
+
+function _search(tasks::Channel{Task}, results::Channel{Instrument}, query::String, properties::AbstractProperty...; start::Union{Nothing, String}=nothing)::Task
+    t = @task post_search(query, properties...; start)
+    t.sticky = false
+    put!(tasks, t)
+    parsing_task = Threads.@spawn _response(t)
+    output_task = Threads.@spawn _add_search_results!(results, parsing_task)
+    next_task = Threads.@spawn _next_search(parsing_task, tasks, results, query, properties...)
+    return Threads.@spawn waitall([output_task, next_task]; failfast=true)
+end
+
+"""
+    instrument_search(tasks, results, query, properties...)
+
+Spawn a `instrument_search` task that processes `query` in batches and populates `results`
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.search_channel()`](@ref))
+- `results::Channel{Instrument}`: the search results in order of return
+- `query::String`: search keywords
+- `properties::AbstractProperty...`: optional properties for limiting results
+
+The task returned from this method is bound to `results`.
+"""
+function instrument_search(tasks::Channel{Task}, results::Channel{Instrument}, query::String, properties::AbstractProperty...)::Task
+    t = _search(tasks, results, query, properties...)
+    bind(results, t)
+    return t
+end
+
+
+"""
+    instrument_search(tasks, query, properties...)
+
+Submits `query` to the search endpoint as scheduled by `tasks`
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.search_channel()`](@ref))
+- `query::String`: search keywords
+- `properties::AbstractProperty...`: optional properties for limiting results
+
+Internally, this method uses [`instrument_search(tasks, results, query, properties...)`](@ref)
+for the batching logic.
+"""
+function instrument_search(tasks::Channel{Task}, query::String, properties::AbstractProperty...)::Vector{Instrument}
+    results_channel = Channel{Instrument}()
+    search_task = instrument_search(tasks, results_channel, query, properties...)
+    results = collect(results_channel)
+    wait(search_task)
+    return results
+end
+
+end  # module

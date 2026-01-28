@@ -69,7 +69,7 @@ mapping_channel() do chnl
 
     @testset "mapping" begin
         job = MappingJob(Ticker("AAPL"), ExchCode("US"), SecurityType2("Common Stock"))
-        obj = mapping(chnl, [job])
+        obj = instrument_mapping(chnl, [job])
         @test length(obj) == 1
         @test obj[1] isa OpenFIGI.DataResponse
         @test length(obj[1].data) == 1
@@ -90,7 +90,7 @@ mapping_channel() do chnl
             MappingJob(BaseTicker("IBM"), MarketSecDes("Corp"), SecurityType2("Corp"), Maturity(Date(2026, 11), nothing)),
             MappingJob(BaseTicker("2251Q"), SecurityType2("Common Stock"), IncludeUnlistedEquities(true)),
         ]
-        obj = mapping(chnl, jobs)
+        obj = instrument_mapping(chnl, jobs)
         @test obj isa Vector{<:OpenFIGI.AbstractResponse}
         @test length(obj) == length(jobs)
         @test obj[1] isa OpenFIGI.DataResponse
@@ -107,7 +107,7 @@ mapping_channel() do chnl
         close(job_channel)
         @test !isopen(job_channel)
 
-        mapping_task = mapping(chnl, job_channel, results_channel)
+        mapping_task = instrument_mapping(chnl, job_channel, results_channel)
         @test mapping_task isa Task
 
         result = only(collect(results_channel))
@@ -126,7 +126,7 @@ mapping_channel() do chnl
 
     @testset "vector mapping" begin
         jobs = [aapl_job, ibm_job]
-        results = mapping(chnl, jobs)
+        results = instrument_mapping(chnl, jobs)
         @test length(results) == 2
         (aapl_result, ibm_result) = results
 
@@ -159,8 +159,8 @@ mapping_channel() do chnl
             MappingJob(IDBBGlobal("BBG000B9ZXB4"), ExchCode("US")),
             MappingJob(IDBBGlobal("BBG000BB29X4"), ExchCode("US")),
         ]
-        @test length(jobs) > OpenFIGI.maxjobs()
-        results = mapping(chnl, jobs)
+        @test length(jobs) > OpenFIGI.Mapping.maxjobs()
+        results = instrument_mapping(chnl, jobs)
         @test length(results) == length(jobs)
         for (job, result) in Iterators.zip(jobs, results)
             @test result isa DataResponse
@@ -170,14 +170,14 @@ mapping_channel() do chnl
     end
 
     @testset "single mapping" begin
-        result = mapping(chnl, ibm_job)
+        result = instrument_mapping(chnl, ibm_job)
         @test result isa DataResponse
         @test length(result.data) == 1
         @test result.data[1].compositeFIGI == IBM_FIGI
     end
 
     @testset "create job in `mapping`" begin
-        result = mapping(chnl, Ticker("NVDA"), ExchCode("US"), SecurityType2("Common Stock"))
+        result = instrument_mapping(chnl, Ticker("NVDA"), ExchCode("US"), SecurityType2("Common Stock"))
         @test result isa DataResponse
         @test length(result.data) == 1
         @test result.data[1].compositeFIGI == NVDA_FIGI

@@ -1,4 +1,12 @@
+module Mapping
+
 ## https://www.openfigi.com/api/documentation#v3-post-mapping
+
+using HTTP
+using JSON
+using ..OpenFIGI: AbstractProperty, AbstractResponse, Identifier, get_apikey, make_request_headers, STATUS_EXCEPTION, URI_BASE
+
+export instrument_mapping, MappingJob
 
 """
     MappingJob(identifier, properties...)
@@ -65,19 +73,19 @@ function handle_mapping_response(response::HTTP.Response)
 end
 
 """
-    mapping(jobs)
+    instrument_mapping(jobs)
 
 Makes a single mapping request from `jobs` to the OpenFIGI API
 
-While this method works fine for a single request, [`mapping(tasks, jobs)`](@ref)
+While this method works fine for a single request, [`instrument_mapping(tasks, jobs)`](@ref)
 is preferred for most use cases for the convenience of batching and abiding by
 the rate limits.
 """
-function mapping(jobs::Vector{MappingJob})::Vector{<:AbstractResponse}
+function instrument_mapping(jobs::Vector{MappingJob})::Vector{<:AbstractResponse}
     return handle_mapping_response(post_mapping(jobs))
 end
 
-function _add_results!(results::Channel{<:AbstractResponse}, tasks::Vector{Task})
+function _add_mapping_results!(results::Channel{<:AbstractResponse}, tasks::Vector{Task})
     for t in tasks
         response = fetch(t)
         for r in handle_mapping_response(response)
@@ -87,12 +95,12 @@ function _add_results!(results::Channel{<:AbstractResponse}, tasks::Vector{Task}
 end
 
 """
-    mapping(tasks, jobs, results)
+    instrument_mapping(tasks, jobs, results)
 
-Spawn a `mapping` task that processes `jobs` in batches and populates 
+Spawn a `instrument_mapping` task that processes `jobs` in batches and populates `results`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.mapping_channel()`](@ref))
 - `jobs::Channel{MappingJob}`: the jobs to send to the mapping endpoint
 - `results::Channel{<:AbstractResponse}`: the mapping results in the same order as `jobs`
 
@@ -100,7 +108,7 @@ The task returned from this method is bound to `results`. If one of the batches
 should error, there will be fewer items in `results` than `jobs`. To detect the
 error state, simply `wait` on the task after consuming the values in `results`.
 """
-function mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Channel{<:AbstractResponse})::Task
+function instrument_mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Channel{<:AbstractResponse})::Task
     batch_size = maxjobs()
     @debug "mapping jobs from a channel in batches of $batch_size"
     local_tasks = Task[]
@@ -131,24 +139,24 @@ function mapping(tasks::Channel{Task}, jobs::Channel{MappingJob}, results::Chann
     put!(tasks, t)
     @debug "final batch submitted"
 
-    results_task = Threads.@spawn _add_results!(results, local_tasks)
+    results_task = Threads.@spawn _add_mapping_results!(results, local_tasks)
     bind(results, results_task)
     return results_task
 end
 
 """
-    mapping(tasks, jobs)
+    instrument_mapping(tasks, jobs)
 
 Submits `jobs` to the mapping endpoint as scheduled by `tasks`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.mapping_channel()`](@ref))
 - `jobs::Vector{MappingJob}`: the jobs to send to the mapping endpoint
 
-Internally, this method uses [`mapping(tasks, jobs, results)`](@ref) for the
+Internally, this method uses [`instrument_mapping(tasks, jobs, results)`](@ref) for the
 batching logic.
 """
-function mapping(tasks::Channel{Task}, jobs::Vector{MappingJob})::Vector{AbstractResponse}
+function instrument_mapping(tasks::Channel{Task}, jobs::Vector{MappingJob})::Vector{AbstractResponse}
     # prepare results
     results_channel = Channel{AbstractResponse}(maxjobs())
     results_task = Threads.@spawn collect(results_channel)
@@ -161,7 +169,7 @@ function mapping(tasks::Channel{Task}, jobs::Vector{MappingJob})::Vector{Abstrac
     end
 
     # queue mapping
-    t = mapping(tasks, job_channel, results_channel)
+    t = instrument_mapping(tasks, job_channel, results_channel)
 
     results = fetch(results_task)
     wait(t)  # raise any errors encountered
@@ -169,32 +177,34 @@ function mapping(tasks::Channel{Task}, jobs::Vector{MappingJob})::Vector{Abstrac
 end
 
 """
-    mapping(tasks, job)
+    instrument_mapping(tasks, job)
 
 Submits `job` to the mapping endpoint as scheduled by `tasks`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.mapping_channel()`](@ref))
 - `job::MappingJob`: the job to send to the mapping endpoint
 
-Internally, this method uses [`mapping(tasks, jobs)`](@ref).
+Internally, this method uses [`instrument_mapping(tasks, jobs)`](@ref).
 """
-function mapping(tasks::Channel{Task}, job::MappingJob)::AbstractResponse
-    return only(mapping(tasks, [job]))
+function instrument_mapping(tasks::Channel{Task}, job::MappingJob)::AbstractResponse
+    return only(instrument_mapping(tasks, [job]))
 end
 
 """
-    mapping(tasks, identifier, properties...)
+    instrument_mapping(tasks, identifier, properties...)
 
 Submits a `MappingJob` constructed from `identifer` and `properties` to the
 mapping endpoint as scheduled by `tasks`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.mapping_channel()`](@ref))
 - `job::MappingJob`: the job to send to the mapping endpoint
 
-Internally, this method uses [`mapping(tasks, jobs)`](@ref).
+Internally, this method uses [`instrument_mapping(tasks, job)`](@ref).
 """
-function mapping(tasks::Channel{Task}, identifier::Identifier, properties::AbstractProperty...)::AbstractResponse
-    return mapping(tasks, MappingJob(identifier, properties...))
+function instrument_mapping(tasks::Channel{Task}, identifier::Identifier, properties::AbstractProperty...)::AbstractResponse
+    return instrument_mapping(tasks, MappingJob(identifier, properties...))
 end
+
+end  # module

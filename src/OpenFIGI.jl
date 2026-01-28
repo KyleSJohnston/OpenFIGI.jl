@@ -16,7 +16,9 @@ using Scratch
 @compat public set_apikey, cache_enums
 export mapping_channel, search_channel
 @compat public mapping_values  # enumerations.jl
-export mapping  # mapping.jl
+export instrument_mapping  # mapping.jl
+export instrument_search  # search.jl
+export instrument_filter  # filter.jl
 
 # Identifiers
 export Identifier
@@ -89,5 +91,9 @@ include("properties.jl")    # requires enumerations for validation
 include("mapping.jl")
 include("search.jl")
 include("filter.jl")
+
+using .Mapping
+using .Search
+using .Filter
 
 end # module OpenFIGI
