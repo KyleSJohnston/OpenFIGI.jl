@@ -1,6 +1,7 @@
-function _task_loop(tasks::Channel{Task})
-    # TODO: add flag to wait until `reset_time` for opening a new channel afterwards
-    isopen(tasks) || throw(ArgumentError("`tasks` channel is not open"))
+function _task_loop(tasks::Channel{Task}, wait_reset::Bool=false)
+    if !isopen(tasks)
+        @warn "`tasks` channel is not open"
+    end
 
     policy = ""
     limit = typemax(Int)
@@ -43,6 +44,17 @@ function _task_loop(tasks::Channel{Task})
 
         @debug "waiting for a new task" limit limit_remaining time_to_reset
     end
+
+    if wait_reset
+        if isinf(reset_time)
+            @warn "reset_time is inf; not waiting for the interval reset"
+        else
+            @debug "waiting for the interval to reset before returning" reset_time
+            sleep(reset_time - time() + 1)  # wait an extra second
+            @debug "done waiting"
+        end
+    end
+    return nothing
 end
 
 """
@@ -67,9 +79,13 @@ function _error_remaining(err::Exception, tasks::Channel{Task})
 end
 
 """
-    rate_limit(tasks)
+    rate_limit(tasks, wait_reset=false)
 
 Schedules tasks from `tasks` at a rate determined by response headers
+
+If `wait_reset` is true, this function will not return until the final interval
+has finished. This may be useful when performing searches after mappings or
+vice versa with a new channel that expects to start in a new interval.
 
 Some of the downstream code relies on the queue-like nature of the `Channel`.
 Without substantially more information about each `Task` in `tasks` and their
@@ -79,10 +95,10 @@ indicate that the task could not be completed and to explain the cause.
 
 See also [OpenFIGI Rate Limits](https://www.openfigi.com/api/documentation#rate-limits).
 """
-function rate_limit(tasks::Channel{Task})
+function rate_limit(tasks::Channel{Task}, wait_reset::Bool=false)
     try
         @debug "starting task loop"
-        _task_loop(tasks)
+        _task_loop(tasks, wait_reset)
     catch err
         @warn "Exception encountered with `rate_limit`; closing channel" err
         close(tasks)  # no additional tasks
@@ -108,7 +124,7 @@ function mapping_channel()::Channel{Task}
 end
 
 """
-    mapping_channel(f)
+    mapping_channel(f, wait_reset=false)
 
 Creates a channel for mapping tasks, runs `f` on that channel, and finally
 closes the channel.
@@ -121,12 +137,17 @@ end
 
 See [`mapping_channel()`](@ref)
 """
-function mapping_channel(f::Function)
-    chnl = mapping_channel()
+function mapping_channel(f::Function, wait_reset::Bool=false)
+    size = isnothing(OpenFIGI.get_apikey()) ? 25 : 250
+    taskref = Ref{Task}()
+    chnl = Channel{Task}(ch -> rate_limit(ch, wait_reset), size; taskref, spawn=true)
     try
         return f(chnl)
     finally
         close(chnl)
+        if wait_reset
+            wait(taskref[]; throw=false)
+        end
     end
 end
 
@@ -144,20 +165,23 @@ function search_channel()::Channel{Task}
 end
 
 """
-    search_channel(f)
+    search_channel(f, wait_reset=false)
 
 Creates a channel for search or filter tasks, runs `f` on that channel, and
 finally closes the channel.
 
-
-
 See [`search_channel()`](@ref)
 """
-function search_channel(f::Function)
-    chnl = search_channel()
+function search_channel(f::Function, wait_reset::Bool=false)
+    size = isnothing(OpenFIGI.get_apikey()) ? 5 : 20
+    taskref = Ref{Task}()
+    chnl = Channel{Task}(ch -> rate_limit(ch, wait_reset), size; taskref, spawn=true)
     try
         return f(chnl)
     finally
         close(chnl)
+        if wait_reset
+            wait(taskref[]; throw=false)
+        end
     end
 end

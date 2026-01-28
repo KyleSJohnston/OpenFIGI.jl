@@ -184,3 +184,32 @@ mapping_channel() do chnl
     end
 
 end
+
+@testset "rate limit interval" begin
+    start = time()
+    result = mapping_channel(false) do chnl
+        @test isopen(chnl)
+        instrument_mapping(chnl, aapl_job)
+    end
+    @test result isa DataResponse
+    stop = time()
+    @test (stop - start) < 30.0
+
+    start = time()
+    result = mapping_channel(true) do chnl
+        @test isopen(chnl)
+        instrument_mapping(chnl, ibm_job)
+    end
+    @test result isa DataResponse
+    stop = time()
+    @test (stop - start) > 30.0
+
+    start = time()
+    result = mapping_channel(true) do chnl
+        return "no requests..."
+    end
+    @test result isa String
+    stop = time()
+    @test (stop - start) < 30.0
+
+end
