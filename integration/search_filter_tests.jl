@@ -1,7 +1,7 @@
 using OpenFIGI
 using Test
 
-ENV["JULIA_DEBUG"] = OpenFIGI
+# ENV["JULIA_DEBUG"] = OpenFIGI
 
 @testset "search" begin
     results = instrument_search("Caterpillar", MarketSecDes("Equity"), SecurityType2("Common Stock"), ExchCode("US"))
