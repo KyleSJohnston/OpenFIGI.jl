@@ -1,4 +1,12 @@
+module Mapping
+
 ## https://www.openfigi.com/api/documentation#v3-post-mapping
+
+using HTTP
+using JSON
+using ..OpenFIGI: AbstractProperty, AbstractResponse, Identifier, get_apikey, make_request_headers, STATUS_EXCEPTION, URI_BASE
+
+export mapping, MappingJob, maxjobs
 
 """
     MappingJob(identifier, properties...)
@@ -198,3 +206,5 @@ Internally, this method uses [`mapping(tasks, jobs)`](@ref).
 function mapping(tasks::Channel{Task}, identifier::Identifier, properties::AbstractProperty...)::AbstractResponse
     return mapping(tasks, MappingJob(identifier, properties...))
 end
+
+end  # module
