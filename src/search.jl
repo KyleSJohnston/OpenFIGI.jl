@@ -36,6 +36,18 @@ function handle_search_response(response::HTTP.Response)
     return JSON.parse(response.body, AbstractResponse)
 end
 
+"""
+    instrument_search(query, properties...)
+
+Sends a single search query to the OpenFIGI API
+
+# Caveats
+- This method is primarily for testing.
+- This method does *not* support paginated responses, so no more than 100 results are returned.
+- This method does *not* attempt to manage requests to comply with rate limits.
+
+Use [`instrument_search(tasks, query, properties...)`](@ref) instead.
+"""
 function instrument_search(query::String, properties::AbstractProperty...)::Vector{Instrument}
     response = handle_search_response(post_search(query, properties...))
     if response isa ErrorResponse
@@ -77,6 +89,19 @@ function _search(tasks::Channel{Task}, results::Channel{Instrument}, query::Stri
     return Threads.@spawn waitall([output_task, next_task]; failfast=true)
 end
 
+"""
+    instrument_search(tasks, results, query, properties...)
+
+Spawn a `instrument_search` task that processes `query` in batches and populates `results`
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`search_channel()`](@ref))
+- `results::Channel{Instrument}`: the search results in order of return
+- `query::String`: search keywords
+- `properties::AbstractProperty...`: optional properties for limiting results
+
+The task returned from this method is bound to `results`.
+"""
 function instrument_search(tasks::Channel{Task}, results::Channel{Instrument}, query::String, properties::AbstractProperty...)::Task
     t = _search(tasks, results, query, properties...)
     bind(results, t)
@@ -84,6 +109,19 @@ function instrument_search(tasks::Channel{Task}, results::Channel{Instrument}, q
 end
 
 
+"""
+    instrument_search(tasks, query, properties...)
+
+Submits `query` to the search endpoint as scheduled by `tasks`
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`search_channel()`](@ref))
+- `query::String`: search keywords
+- `properties::AbstractProperty...`: optional properties for limiting results
+
+Internally, this method uses [`instrument_search(tasks, results, query, properties...)`](@ref)
+for the batching logic.
+"""
 function instrument_search(tasks::Channel{Task}, query::String, properties::AbstractProperty...)::Vector{Instrument}
     results_channel = Channel{Instrument}()
     search_task = instrument_search(tasks, results_channel, query, properties...)

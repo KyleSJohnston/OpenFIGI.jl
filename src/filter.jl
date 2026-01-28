@@ -42,6 +42,18 @@ function handle_response(response::HTTP.Response)
     return JSON.parse(response.body, AbstractResponse)
 end
 
+"""
+    instrument_filter(query, properties...)
+
+Sends a single filter query to the OpenFIGI API
+
+# Caveats
+- This method is primarily for testing.
+- This method does *not* support paginated responses, so no more than 100 results are returned.
+- This method does *not* attempt to manage requests to comply with rate limits.
+
+Use [`instrument_filter(tasks, query, properties...)`](@ref) instead.
+"""
 function instrument_filter(properties::AbstractProperty...; query::Union{Nothing, String}=nothing)::Vector{Instrument}
     response = handle_response(post(query, properties...))
     if response isa ErrorResponse
@@ -89,6 +101,19 @@ function _filter(
     return Threads.@spawn waitall([output_task, next_task]; failfast=true)
 end
 
+"""
+    instrument_filter(tasks, results, properties...; [query])
+
+Spawn a `instrument_search` task that processes `query` in batches and populates `results`
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`search_channel()`](@ref))
+- `results::Channel{Instrument}`: the search results in order of return
+- `properties::AbstractProperty...`: optional properties for limiting results
+- `query::String`: optional filter keywords
+
+The task returned from this method is bound to `results`.
+"""
 function instrument_filter(
     tasks::Channel{Task},
     results::Channel{Instrument},
@@ -100,7 +125,19 @@ function instrument_filter(
     return t
 end
 
+"""
+    instrument_filter(tasks, query, properties...)
 
+Submits `query` to the filter endpoint as scheduled by `tasks`
+
+# Arguments
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`search_channel()`](@ref))
+- `properties::AbstractProperty...`: optional properties for limiting results
+- `query::String`: search keywords
+
+Internally, this method uses [`instrument_filter(tasks, results, properties...; query)`](@ref)
+for the batching logic.
+"""
 function instrument_filter(
     tasks::Channel{Task},
     properties::AbstractProperty...;
