@@ -1,7 +1,7 @@
 name = "OpenFIGI"
 uuid = "853cdae6-d31d-485b-952e-6d292502e0c8"
 authors = ["Kyle S. Johnston <KyleSJohnston@users.noreply.github.com>"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
