@@ -107,7 +107,7 @@ end
 Spawn a `instrument_search` task that processes `query` in batches and populates `results`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`search_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.search_channel()`](@ref))
 - `results::Channel{Instrument}`: the search results in order of return
 - `properties::AbstractProperty...`: optional properties for limiting results
 - `query::String`: optional filter keywords
@@ -131,7 +131,7 @@ end
 Submits `query` to the filter endpoint as scheduled by `tasks`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`search_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.search_channel()`](@ref))
 - `properties::AbstractProperty...`: optional properties for limiting results
 - `query::String`: search keywords
 

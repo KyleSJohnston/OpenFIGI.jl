@@ -100,7 +100,7 @@ end
 Spawn a `instrument_mapping` task that processes `jobs` in batches and populates `results`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.mapping_channel()`](@ref))
 - `jobs::Channel{MappingJob}`: the jobs to send to the mapping endpoint
 - `results::Channel{<:AbstractResponse}`: the mapping results in the same order as `jobs`
 
@@ -150,7 +150,7 @@ end
 Submits `jobs` to the mapping endpoint as scheduled by `tasks`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.mapping_channel()`](@ref))
 - `jobs::Vector{MappingJob}`: the jobs to send to the mapping endpoint
 
 Internally, this method uses [`instrument_mapping(tasks, jobs, results)`](@ref) for the
@@ -182,7 +182,7 @@ end
 Submits `job` to the mapping endpoint as scheduled by `tasks`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.mapping_channel()`](@ref))
 - `job::MappingJob`: the job to send to the mapping endpoint
 
 Internally, this method uses [`instrument_mapping(tasks, jobs)`](@ref).
@@ -198,7 +198,7 @@ Submits a `MappingJob` constructed from `identifer` and `properties` to the
 mapping endpoint as scheduled by `tasks`
 
 # Arguments
-- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`mapping_channel()`](@ref))
+- `tasks::Channel{Task}`: a rate-limited channel for scheduling API requests (see [`OpenFIGI.mapping_channel()`](@ref))
 - `job::MappingJob`: the job to send to the mapping endpoint
 
 Internally, this method uses [`instrument_mapping(tasks, job)`](@ref).

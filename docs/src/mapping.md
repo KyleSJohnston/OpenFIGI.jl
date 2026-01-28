@@ -3,16 +3,16 @@
 ## Rate-Limited Methods
 
 ```@docs
-mapping(::Channel{Task}, ::Vector{MappingJob})
-mapping(::Channel{Task}, ::MappingJob)
-mapping(::Channel{Task}, ::Identifier, ::OpenFIGI.AbstractProperty...)
-mapping(::Channel{Task}, ::Channel{MappingJob}, ::Channel{<:OpenFIGI.AbstractResponse})
+instrument_mapping(::Channel{Task}, ::Vector{MappingJob})
+instrument_mapping(::Channel{Task}, ::MappingJob)
+instrument_mapping(::Channel{Task}, ::Identifier, ::OpenFIGI.AbstractProperty...)
+instrument_mapping(::Channel{Task}, ::Channel{MappingJob}, ::Channel{<:OpenFIGI.AbstractResponse})
 ```
 
 ## Direct Methods
 
 ```@docs
-mapping(::Vector{MappingJob})
+instrument_mapping(::Vector{MappingJob})
 ```
 
 ## Responses

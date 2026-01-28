@@ -13,6 +13,7 @@ makedocs(
         "interface.md",
         "configuration.md",
         "mapping.md",
+        "search_filter.md",
     ],
 )
 
