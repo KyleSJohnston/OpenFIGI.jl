@@ -6,7 +6,7 @@ using HTTP
 using JSON
 using ..OpenFIGI: AbstractProperty, AbstractResponse, Identifier, get_apikey, make_request_headers, STATUS_EXCEPTION, URI_BASE
 
-export instrument_mapping, MappingJob, maxjobs
+export instrument_mapping, MappingJob
 
 """
     MappingJob(identifier, properties...)

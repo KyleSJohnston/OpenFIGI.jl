@@ -159,7 +159,7 @@ mapping_channel() do chnl
             MappingJob(IDBBGlobal("BBG000B9ZXB4"), ExchCode("US")),
             MappingJob(IDBBGlobal("BBG000BB29X4"), ExchCode("US")),
         ]
-        @test length(jobs) > OpenFIGI.maxjobs()
+        @test length(jobs) > OpenFIGI.Mapping.maxjobs()
         results = instrument_mapping(chnl, jobs)
         @test length(results) == length(jobs)
         for (job, result) in Iterators.zip(jobs, results)
