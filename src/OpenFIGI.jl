@@ -32,7 +32,7 @@ export VendorIndexCode
 # Properties
 export ExchCode, MICCode, Currency, MarketSecDes, SecurityType, SecurityType2
 export IncludeUnlistedEquities, OptionType, Strike, ContractSize, Coupon
-export Expiration, Maturity, StateCode
+export Expiration, Maturity, StateCode, Interval
 
 # Structs
 export MappingJob
