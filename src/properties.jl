@@ -40,6 +40,11 @@ propertyvalue(p::MICCode) = p.value
 """
 struct Currency <: AbstractProperty
     value::String
+
+    function Currency(value::String; validation_policy::Symbol=:error)
+        validate_enum("currency", value; validation_policy)
+        new(value)
+    end
 end
 propertykey(::Currency) = "currency"
 propertyvalue(p::Currency) = p.value
@@ -100,6 +105,21 @@ propertyvalue(p::IncludeUnlistedEquities) = p.value
 """
 struct OptionType <: AbstractProperty
     value::String
+
+    function OptionType(value::String; validation_policy::Symbol=:error)
+        validation_policy == :skip || validation_policy == :warning || validation_policy == :error || throw(ArgumentError("invalid policy $validation_policy"))
+
+        is_valid = validation_policy == :skip || value == "Call" || value == "Put"
+
+        if !is_valid
+            if validation_policy == :error
+                throw(ArgumentError("Invalid OptionType $value"))
+            else
+                @warn "Invalid OptionType $value"
+            end
+        end
+        new(value)
+    end
 end
 propertykey(::OptionType) = "optionType"
 propertyvalue(p::OptionType) = p.value
@@ -131,27 +151,27 @@ propertyvalue(interval::Interval) = [interval.lbound, interval.ubound]
 """
     Strike(lbound, ubound)
 """
-Strike = Base.Fix1(Interval, "strike")
+Strike(args...) = Interval("strike", args...)
 
 """
     ContractSize(lbound, ubound)
 """
-ContractSize = Base.Fix1(Interval, "contractSize")
+ContractSize(args...) = Interval("contractSize", args...)
 
 """
     Coupon(lbound, ubound)
 """
-Coupon = Base.Fix1(Interval, "coupon")
+Coupon(args...) = Interval("coupon", args...)
 
 """
     Expiration(lbound, ubound)
 """
-Expiration = Base.Fix1(Interval{Date}, "expiration")
+Expiration(args...) = Interval{Date}("expiration", args...)
 
 """
     Maturity(lbound, ubound)
 """
-Maturity = Base.Fix1(Interval{Date}, "maturity")
+Maturity(args...) = Interval{Date}("maturity", args...)
 
 """
     StateCode(value)
