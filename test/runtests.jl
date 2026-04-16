@@ -112,7 +112,9 @@ end
     @testset "Code quality (Aqua.jl)" begin
         Aqua.test_all(OpenFIGI)
     end
-    @testset "Code linting (JET.jl)" begin
-        JET.test_package(OpenFIGI; target_modules = (OpenFIGI,))
+    if "--jettest" in ARGS
+        @testset "Code linting (JET.jl)" begin
+            JET.test_package(OpenFIGI; target_modules = (OpenFIGI,))
+        end
     end
 end
