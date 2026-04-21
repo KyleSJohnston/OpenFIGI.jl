@@ -5,6 +5,4 @@ updates:
     schedule:
       interval: "weekly"
     assignees:
-      - "kylesjohnston"
-    reviewers:
-      - "kylesjohnston"
+      - "KyleSJohnston"
